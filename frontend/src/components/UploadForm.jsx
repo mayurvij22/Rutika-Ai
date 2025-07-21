@@ -19,7 +19,7 @@ const UploadForm = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post('http://localhost:5000/api/plants/upload', { photoUrl });
+      const res = await axios.post('https://rutika-ai.onrender.com/api/plants/upload', { photoUrl });
 
       sessionStorage.setItem('plantData', JSON.stringify(res.data));
       toast.success('✅ Plant uploaded and analyzed!');
