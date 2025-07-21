@@ -6,13 +6,17 @@ const uploadPlant = async (req, res) => {
   try {
     const { photoUrl } = req.body;
 
-    // 1. Identify plant via Plant.id or custom model
+    if (!photoUrl) {
+      return res.status(400).json({ error: 'Missing photoUrl in request body' });
+    }
+
+    // 1. Identify plant
     const { species, suggestions } = await identifyPlantSpecies(photoUrl);
 
-    // 2. Ask Gemini for care tips
+    // 2. Generate care tips from Gemini
     const { careTips, careTags, predictedDisease } = await generateCareTips(species, suggestions);
 
-    // 3. Save to DB
+    // 3. Save to MongoDB
     const newPlant = new Plant({
       photoUrl,
       species,
@@ -25,10 +29,12 @@ const uploadPlant = async (req, res) => {
     await newPlant.save();
 
     res.status(201).json(newPlant);
+
   } catch (err) {
     console.error('❌ Upload failed:', err.message);
-   console.error('❌ Upload failed:', err?.response?.data || err.message);
+    res.status(400).json({ error: err.message || 'Unknown error during upload' });
   }
 };
+
 
 module.exports = { uploadPlant };

@@ -1,11 +1,13 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+dotenv.config();
+const mongoose = require('mongoose');
 const cors = require('cors');
+
 
 const plantRoutes = require('./routes/plantRoutes');
 
-dotenv.config();
+
 const app = express();
 
 // Middleware

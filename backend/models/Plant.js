@@ -7,8 +7,8 @@ const SuggestionSchema = new mongoose.Schema({
 });
 
 const PlantSchema = new mongoose.Schema({
-  photoUrl: { type: String, required: true },
-  species: { type: String, required: true },
+  photoUrl: { type: String},
+  species: { type: String },
   suggestions: [SuggestionSchema],        // Top 3 matches from Plant ID API
   careTags: [String],                     // Watering / Sunlight tags
   careTips: String,                       // AI-generated from Gemini
