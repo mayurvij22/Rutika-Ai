@@ -1,24 +1,35 @@
 const Plant = require('../models/Plant');
 const { identifyPlantSpecies, generateCareTips } = require('../utils/ai');
-
-// POST /api/plants/upload
+const { cloudinary } = require('../utils/cloudinary');
 const uploadPlant = async (req, res) => {
-  try {
-    const { photoUrl } = req.body;
+ 
+     
+         try {
+    let imageUrl = '';
 
-    if (!photoUrl) {
-      return res.status(400).json({ error: 'Missing photoUrl in request body' });
+    // Case 1: File upload
+    if (req.file) {
+      imageUrl = req.file.path;
     }
 
-    // 1. Identify plant
-    const { species, suggestions } = await identifyPlantSpecies(photoUrl);
+    // Case 2: URL input
+    else if (req.body.photoUrl) {
+      const result = await cloudinary.uploader.upload(req.body.photoUrl, {
+        folder: 'plantpal_uploads',
+        fetch_format: 'auto',
+      });
+      imageUrl = result.secure_url;
+    }
 
-    // 2. Generate care tips from Gemini
+    if (!imageUrl) {
+      return res.status(400).json({ error: 'No image provided' });
+    }
+
+    const { species, suggestions } = await identifyPlantSpecies(imageUrl);
     const { careTips, careTags, predictedDisease } = await generateCareTips(species, suggestions);
 
-    // 3. Save to MongoDB
     const newPlant = new Plant({
-      photoUrl,
+      photoUrl: imageUrl,
       species,
       suggestions,
       careTips,
@@ -31,10 +42,40 @@ const uploadPlant = async (req, res) => {
     res.status(201).json(newPlant);
 
   } catch (err) {
-    console.error('❌ Upload failed:', err.message);
-    res.status(400).json({ error: err.message || 'Unknown error during upload' });
+    console.error('❌ Full upload error:', err.message);
+    res.status(400).json({ error: err.message });
   }
-};
 
+
+    // Image uploaded to Cloudinary by multer
+  //   const imageUrl = req.file.path;
+
+  //   // Step 1: Identify plant
+  //   const { species, suggestions } = await identifyPlantSpecies(imageUrl);
+
+  //   // Step 2: Generate care tips using Gemini
+  //   const { careTips, careTags, predictedDisease } = await generateCareTips(species, suggestions);
+
+  //   // Step 3: Save to DB
+  //   const newPlant = new Plant({
+  //     photoUrl: imageUrl,
+  //     species,
+  //     suggestions,
+  //     careTips,
+  //     careTags,
+  //     predictedDisease,
+  //   });
+
+  //   await newPlant.save();
+
+  //   // Step 4: Send full result
+  //   res.status(201).json(newPlant);
+
+  // } catch (err) {
+  //   console.error('❌ Full upload error:', err.message);
+  //   res.status(400).json({ error: err.message });
+  // }
+
+}
 
 module.exports = { uploadPlant };
