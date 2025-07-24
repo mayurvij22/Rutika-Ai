@@ -86,11 +86,6 @@ Headers:
   Content-Type: multipart/form-data
 Body:
   image=<your_image_file>
-📄 License
-ISC © 2025 — [Your Name or Organization]
 
-javascript
-Copy
-Edit
 
-Would you like this saved as a file (`README.md`) or need a frontend banner with this Rutika AI welcome message as wel
+
